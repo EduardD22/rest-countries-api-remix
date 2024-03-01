@@ -14,14 +14,25 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+type CountryType = {
+  cca2: string;
+  name: {
+    common: string;
+  };
+  population: number;
+  region: string;
+  capital: string;
+};
+type LoaderDataType = {
+  countries: CountryType[];
+};
 export async function loader({ request }: LoaderFunctionArgs) {
   const response = await fetch("https://restcountries.com/v3.1/all");
   const countries = await response.json();
 
-  /*const shuffledCountries = shuffleArray(countries);
+  const shuffledCountries = shuffleArray(countries);
   const randomCountries = shuffledCountries.slice(0, 8);
-  return { randomCountries };*/
-  return { countries };
+  return json({ countries: randomCountries } as LoaderDataType);
 }
 
 export default function Index() {
