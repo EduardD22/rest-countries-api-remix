@@ -1,11 +1,7 @@
-import {
-  json,
-  type LoaderFunctionArgs,
-  type MetaFunction,
-} from "@remix-run/node";
+import { json, type MetaFunction } from "@remix-run/node";
+import { getRandomCountries } from "~/api.server";
 
-import CountriesGrid from "~/components/CountriesGrid";
-import { shuffleArray } from "~/utils";
+import { CountriesGrid } from "~/routes/resource.countries";
 
 export const meta: MetaFunction = () => {
   return [
@@ -14,14 +10,9 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const response = await fetch("https://restcountries.com/v3.1/all");
-  const countries = await response.json();
-
-  /*const shuffledCountries = shuffleArray(countries);
-  const randomCountries = shuffledCountries.slice(0, 8);
-  return { randomCountries };*/
-  return { countries };
+export async function loader() {
+  const countries = await getRandomCountries();
+  return json({ countries });
 }
 
 export default function Index() {
