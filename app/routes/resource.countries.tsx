@@ -1,11 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardTitle } from "@/components/ui/card";
+import { json } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
-import { useCallback } from "react";
+import { getRandomCountries } from "~/api.server";
 
-import { loader } from "~/routes/_layout._index";
+// This is a Full Stack component
+// https://www.epicweb.dev/full-stack-components
+// It is a resource route that also exports a UI component for use in app
 
-const CountriesGrid = () => {
+export async function loader() {
+  const countries = await getRandomCountries();
+  return json({ countries });
+}
+
+export function CountriesGrid() {
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof loader>();
 
@@ -60,6 +68,4 @@ const CountriesGrid = () => {
       </div>
     </>
   );
-};
-
-export default CountriesGrid;
+}
