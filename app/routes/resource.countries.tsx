@@ -21,7 +21,7 @@ export function CountriesGrid() {
   // fetcher.data will have new countries
   const countries = fetcher.data?.countries ?? loaderData.countries;
 
-  const getRandomCountries = () => fetcher.load("/?index");
+  const getRandomCountries = () => fetcher.load("/resource/countries");
 
   return (
     <>
