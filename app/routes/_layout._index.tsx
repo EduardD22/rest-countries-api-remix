@@ -3,7 +3,7 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import { getRandomCountries } from "~/api.server";
+import { getCountries, getRandomCountries } from "~/api.server";
 import { CountriesGrid } from "./resource.countries";
 
 export const meta: MetaFunction = () => {
