@@ -1,6 +1,6 @@
 import { shuffleArray } from "~/utils";
 
-type CountryType = {
+export type CountryType = {
   cca2: string;
   name: {
     common: string;
@@ -41,4 +41,21 @@ export async function getCountryByCode(cca2: string) {
 
   const country = (await response.json()) as CountryType[];
   return country[0]; // Since we fetch by code, we expect a single result
+}
+
+export async function getFilteredCountries(query = "") {
+  const response = await fetch("https://restcountries.com/v3.1/all");
+  const countries = (await response.json()) as CountryType[];
+
+  let filteredCountries = countries;
+
+  if (query) {
+    const searchQuery = query.toLowerCase();
+    filteredCountries = filteredCountries.filter(
+      (country) =>
+        country.name.common.toLowerCase().includes(searchQuery) ||
+        country.name.official.toLowerCase().includes(searchQuery)
+    );
+  }
+  return filteredCountries;
 }
