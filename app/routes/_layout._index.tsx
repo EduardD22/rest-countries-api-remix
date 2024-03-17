@@ -3,14 +3,10 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import {
-  getCountries,
-  getFilteredCountries,
-  getRandomCountries,
-} from "~/api.server";
+import { getFilteredCountries, getRandomCountries } from "~/api.server";
 import { CountriesGrid } from "./resource.countries";
 
-import { Form, useLoaderData, useSubmit } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData, useSubmit } from "@remix-run/react";
 
 import { Input } from "@/components/ui/input";
 
@@ -47,6 +43,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Index() {
   const { q, region } = useLoaderData<typeof loader>();
+  // added a fetcher
+  const fetcher = useFetcher<typeof loader>();
   const regions = [
     "Europe",
     "Oceania",
@@ -55,6 +53,12 @@ export default function Index() {
     "Antarctic",
     "Asia",
   ];
+
+  // using the fetcher.data or the loader data depending on the fetcher state
+  const countries =
+    fetcher.data?.countries ?? fetcher.state === "idle"
+      ? useLoaderData<typeof loader>().countries
+      : [];
 
   const submit = useSubmit();
 
@@ -72,7 +76,12 @@ export default function Index() {
         }}
       >
         <div className="flex w-full max-w-sm items-center space-x-2 ">
-          <Select name="region" defaultValue={region || ""}>
+          <Select
+            name="region"
+            defaultValue={
+              fetcher.state === "idle" ? region || "" : "All Regions"
+            }
+          >
             <SelectTrigger className="rounded-none bg-secondary">
               <SelectValue placeholder="Filter by Region" />
             </SelectTrigger>
@@ -91,13 +100,13 @@ export default function Index() {
             className=" rounded-none bg-secondary"
             type="search"
             name="q"
-            defaultValue={q || ""}
+            defaultValue={fetcher.state === "idle" ? q || "" : ""}
             id="q"
             placeholder="Search for a country..."
           />
         </div>
       </Form>
-      <CountriesGrid />
+      <CountriesGrid countries={countries} />
     </>
   );
 }

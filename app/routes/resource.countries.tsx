@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { json } from "@remix-run/node";
-import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useFetcher,
+  useLoaderData,
+  useSubmit,
+} from "@remix-run/react";
 import { RefreshCcw, RefreshCwOff } from "lucide-react";
-import { getRandomCountries } from "~/api.server";
+import { CountryType, getRandomCountries } from "~/api.server";
 
 // This is a Full Stack component
 // https://www.epicweb.dev/full-stack-components
@@ -14,31 +20,32 @@ export async function loader() {
   return json({ countries });
 }
 
-export function CountriesGrid() {
-  const loaderData = useLoaderData<typeof loader>();
+export function CountriesGrid({ countries }: { countries: CountryType[] }) {
   const fetcher = useFetcher<typeof loader>();
+  const submit = useSubmit();
 
-  // loader data will have initial countries
-  // fetcher.data will have new countries
-  const countries = fetcher.data?.countries ?? loaderData.countries;
-
-  const getRandomCountries = () => fetcher.load("/resource/countries");
+  const getRandomCountries = () => {
+    fetcher.load("/resource/countries");
+    submit(null, { replace: true });
+  };
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={getRandomCountries}
-        disabled={fetcher.state !== "idle"}
-        className=" mt-12"
-      >
-        {fetcher.state === "idle" ? (
-          <RefreshCcw className="h-[1.2rem] w-[1.2rem]" />
-        ) : (
-          <RefreshCwOff className="h-[1.2rem] w-[1.2rem] " />
-        )}
-      </Button>
+      <Form replace>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={getRandomCountries}
+          disabled={fetcher.state !== "idle"}
+          className=" mt-12"
+        >
+          {fetcher.state === "idle" ? (
+            <RefreshCcw className="h-[1.2rem] w-[1.2rem]" />
+          ) : (
+            <RefreshCwOff className="h-[1.2rem] w-[1.2rem] " />
+          )}
+        </Button>
+      </Form>
 
       <div className="grid place-items-center gap-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-12">
         {countries.map((country) => {
