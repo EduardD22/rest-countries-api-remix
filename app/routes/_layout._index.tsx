@@ -11,9 +11,9 @@ import {
 import { CountriesGrid } from "./resource.countries";
 
 import { Form, useLoaderData, useSubmit } from "@remix-run/react";
-import { useEffect, useState } from "react";
+
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SelectGroup } from "@radix-ui/react-select";
 
 export const meta: MetaFunction = () => {
   return [
@@ -32,25 +33,31 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
+  const region = url.searchParams.get("region");
 
-  const countries = q
-    ? await getFilteredCountries(q)
-    : await getRandomCountries();
+  const isNoRegionSelected = !region || region === "All Regions";
 
-  return json({ countries, q });
+  const countries =
+    q || region
+      ? await getFilteredCountries(q, isNoRegionSelected ? "" : region)
+      : await getRandomCountries();
+
+  return json({ countries, q, region });
 }
 
 export default function Index() {
-  const { q } = useLoaderData<typeof loader>();
-  // the query now needs to be kept in state
-  const [query, setQuery] = useState(q || "");
+  const { q, region } = useLoaderData<typeof loader>();
+  const regions = [
+    "Europe",
+    "Oceania",
+    "Africa",
+    "Americas",
+    "Antarctic",
+    "Asia",
+  ];
+
   const submit = useSubmit();
 
-  // we still have a `useEffect` to synchronize the query
-  // to the component state on back/forward button clicks
-  useEffect(() => {
-    setQuery(q || "");
-  }, [q]);
   return (
     <>
       <Form
@@ -58,29 +65,36 @@ export default function Index() {
         method="get"
         role="search"
         onChange={(event) => {
-          const isFirstSearch = q === null;
+          const isFirstSearch = q === "" && region === "";
           submit(event.currentTarget, {
             replace: !isFirstSearch,
           });
         }}
       >
         <div className="flex w-full max-w-sm items-center space-x-2 ">
+          <Select name="region" defaultValue={region || ""}>
+            <SelectTrigger className="rounded-none bg-secondary">
+              <SelectValue placeholder="Filter by Region" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem>All Regions</SelectItem>
+                {regions.map((region) => (
+                  <SelectItem key={region} value={region}>
+                    {region}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <Input
             className=" rounded-none bg-secondary"
             type="search"
             name="q"
-            // synchronize user's input to component state
-            onChange={(event) => setQuery(event.currentTarget.value)}
-            defaultValue={query || ""}
+            defaultValue={q || ""}
             id="q"
-            // switched to `value` from `defaultValue`
-            value={query}
             placeholder="Search for a country..."
           />
-
-          <Button type="submit" className="rounded-none">
-            Search
-          </Button>
         </div>
       </Form>
       <CountriesGrid />

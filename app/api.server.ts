@@ -43,7 +43,7 @@ export async function getCountryByCode(cca2: string) {
   return country[0]; // Since we fetch by code, we expect a single result
 }
 
-export async function getFilteredCountries(query = "") {
+export async function getFilteredCountries(query = "", region = "") {
   const response = await fetch("https://restcountries.com/v3.1/all");
   const countries = (await response.json()) as CountryType[];
 
@@ -57,5 +57,12 @@ export async function getFilteredCountries(query = "") {
         country.name.official.toLowerCase().includes(searchQuery)
     );
   }
+
+  if (region) {
+    filteredCountries = filteredCountries.filter(
+      (country) => country.region === region
+    );
+  }
+
   return filteredCountries;
 }
